@@ -1,12 +1,9 @@
-import requests
+from diffusers import StableDiffusionPipeline
+import torch
 
 def generate_image(prompt):
-    url = "https://api.deepai.org/api/text2img"
-    headers = {"api-key": "502d5b13-770e-470e-b281-cf3ed6937301"}
-    data = {"text": prompt}
-
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        return response.json().get("output_url")
-    else:
-        return {"error": response.status_code}
+    model_id = "runwayml/stable-diffusion-v1-5"
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float32)
+    pipe.to("cpu")  # Force CPU if GPU is unavailable
+    image = pipe(prompt, guidance_scale=7.5).images[0]  # Use guidance scale to adjust quality
+    return image
